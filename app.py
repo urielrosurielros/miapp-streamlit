@@ -1,29 +1,37 @@
+
 import streamlit as st
 import psycopg2, os, boto3
+from urllib.parse import urlparse
 
+# ============================
+# 🔎 Configuración DB (Railway)
+# ============================
+DB_URL = os.getenv("DATABASE_URL")
 
+def get_connection():
+    try:
+        if DB_URL:  # Usar DATABASE_URL si existe
+            if DB_URL.startswith("postgres://"):
+                db_url = DB_URL.replace("postgres://", "postgresql://", 1)
+            else:
+                db_url = DB_URL
+            conn = psycopg2.connect(db_url)
+        else:  # Fallback a variables separadas
+            DB_CONFIG = {
+                "host": os.getenv("PGHOST", "postgres.railway.internal"),
+                "port": os.getenv("PGPORT", "5432"),
+                "user": os.getenv("PGUSER", "postgres"),
+                "password": os.getenv("PGPASSWORD", "ZzZBFonupmAZCsjnMPUOJhwZktiJdHuS"),
+                "dbname": os.getenv("PGDATABASE", "postgres")
+            }
+            conn = psycopg2.connect(**DB_CONFIG)
+        return conn
+    except Exception as e:
+        raise RuntimeError(f"❌ Error al conectar a la DB: {e}")
 
-# ---------------------------
-# Configuración DB (Railway)
-# ---------------------------
-PGHOST = os.getenv("PGHOST")
-PGPORT = os.getenv("PGPORT")
-PGUSER = os.getenv("PGUSER")
-PGPASSWORD = os.getenv("PGPASSWORD")
-PGDATABASE = os.getenv("PGDATABASE")
-
-DB_URL = f"postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{PGDATABASE}"
-
-# Verificación de variables de entorno que deberían venir de Railway
-st.write("🔎 DEBUG - Variables de entorno recibidas:")
-
-vars_to_check = ["PGHOST", "PGPORT", "PGUSER", "PGPASSWORD", "PGDATABASE", "DATABASE_URL"]
-for var in vars_to_check:
-    st.write(f"{var}: {os.getenv(var)}")
-    
-# ---------------------------
-# Configuración Backblaze B2
-# ---------------------------
+# ============================
+# ☁️ Configuración Backblaze B2
+# ============================
 B2_KEY_ID = os.getenv("B2_KEY_ID")
 B2_APP_KEY = os.getenv("B2_APP_KEY")
 B2_BUCKET = os.getenv("B2_BUCKET")
@@ -36,9 +44,9 @@ s3 = boto3.client(
     aws_secret_access_key=B2_APP_KEY
 )
 
-# ---------------------------
-# App Streamlit
-# ---------------------------
+# ============================
+# 🚀 Interfaz Streamlit
+# ============================
 st.title("🚀 Mi App con Streamlit + PostgreSQL + Backblaze B2")
 
 # --- Guardar texto en PostgreSQL ---
@@ -46,15 +54,16 @@ st.header("Guardar texto en la base de datos")
 texto = st.text_input("Escribe algo para guardar en PostgreSQL:")
 if st.button("Guardar en DB"):
     try:
-        conn = psycopg2.connect(DB_URL)
+        conn = get_connection()
         cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS datos (id SERIAL PRIMARY KEY, info TEXT);")
         cur.execute("INSERT INTO datos (info) VALUES (%s)", (texto,))
         conn.commit()
         cur.close()
         conn.close()
         st.success("Texto guardado en la base de datos ✅")
     except Exception as e:
-        st.error(f"❌ Error al conectar a la DB: {e}")
+        st.error(f"No se pudo guardar: {e}")
 
 # --- Subir archivos a Backblaze B2 ---
 st.header("Subir archivo a Backblaze B2")
@@ -65,5 +74,4 @@ if archivo is not None:
             s3.upload_fileobj(archivo, B2_BUCKET, archivo.name)
             st.success(f"Archivo '{archivo.name}' subido correctamente 🚀")
         except Exception as e:
-            st.error(f"❌ Error al subir archivo: {e}")
-
+            st.error(f"Error al subir archivo: {e}")
