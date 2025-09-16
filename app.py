@@ -1,30 +1,15 @@
 
 import streamlit as st
 import psycopg2, os, boto3
-from urllib.parse import urlparse
 
 # ============================
 # 🔎 Configuración DB (Railway)
 # ============================
-DB_URL = os.getenv("DATABASE_URL")
+DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres:rByEQidKiDRkpkRNEsbUbhgCjbcfJJuJ@yamanote.proxy.rlwy.net:15387/railway")
 
 def get_connection():
     try:
-        if DB_URL:  # Usar DATABASE_URL si existe
-            if DB_URL.startswith("postgres://"):
-                db_url = DB_URL.replace("postgres://", "postgresql://", 1)
-            else:
-                db_url = DB_URL
-            conn = psycopg2.connect(db_url)
-        else:  # Fallback a variables separadas
-            DB_CONFIG = {
-                "host": os.getenv("PGHOST", "postgres.railway.internal"),
-                "port": os.getenv("PGPORT", "5432"),
-                "user": os.getenv("PGUSER", "postgres"),
-                "password": os.getenv("PGPASSWORD", "rByEQidKiDRkpkRNEsbUbhgCjbcfJJuJ"),
-                "dbname": os.getenv("PGDATABASE", "postgres")
-            }
-            conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg2.connect(DB_URL)
         return conn
     except Exception as e:
         raise RuntimeError(f"❌ Error al conectar a la DB: {e}")
