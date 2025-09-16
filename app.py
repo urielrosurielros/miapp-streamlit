@@ -1,6 +1,8 @@
 import streamlit as st
 import psycopg2, os, boto3
 
+
+
 # ---------------------------
 # Configuración DB (Railway)
 # ---------------------------
@@ -12,6 +14,13 @@ PGDATABASE = os.getenv("PGDATABASE")
 
 DB_URL = f"postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{PGDATABASE}"
 
+# Verificación de variables de entorno que deberían venir de Railway
+st.write("🔎 DEBUG - Variables de entorno recibidas:")
+
+vars_to_check = ["PGHOST", "PGPORT", "PGUSER", "PGPASSWORD", "PGDATABASE", "DATABASE_URL"]
+for var in vars_to_check:
+    st.write(f"{var}: {os.getenv(var)}")
+    
 # ---------------------------
 # Configuración Backblaze B2
 # ---------------------------
@@ -57,3 +66,4 @@ if archivo is not None:
             st.success(f"Archivo '{archivo.name}' subido correctamente 🚀")
         except Exception as e:
             st.error(f"❌ Error al subir archivo: {e}")
+
