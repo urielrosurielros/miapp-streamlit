@@ -21,7 +21,7 @@ def get_connection():
                 "host": os.getenv("PGHOST", "postgres.railway.internal"),
                 "port": os.getenv("PGPORT", "5432"),
                 "user": os.getenv("PGUSER", "postgres"),
-                "password": os.getenv("PGPASSWORD", "ZzZBFonupmAZCsjnMPUOJhwZktiJdHuS"),
+                "password": os.getenv("PGPASSWORD", "rByEQidKiDRkpkRNEsbUbhgCjbcfJJuJ"),
                 "dbname": os.getenv("PGDATABASE", "postgres")
             }
             conn = psycopg2.connect(**DB_CONFIG)
@@ -75,3 +75,4 @@ if archivo is not None:
             st.success(f"Archivo '{archivo.name}' subido correctamente 🚀")
         except Exception as e:
             st.error(f"Error al subir archivo: {e}")
+
