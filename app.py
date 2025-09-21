@@ -3,7 +3,7 @@ import streamlit as st
 import psycopg2, os, boto3
 
 # ============================
-# 🔎 Configuración DB (Railway)
+# Configuración DB (Railway)
 # ============================
 DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres:rByEQidKiDRkpkRNEsbUbhgCjbcfJJuJ@yamanote.proxy.rlwy.net:15387/railway")
 
@@ -12,10 +12,10 @@ def get_connection():
         conn = psycopg2.connect(DB_URL)
         return conn
     except Exception as e:
-        raise RuntimeError(f"❌ Error al conectar a la DB: {e}")
+        raise RuntimeError(f"Error al conectar a la DB: {e}")
 
 # ============================
-# ☁️ Configuración Backblaze B2
+# ☁Configuración Backblaze B2
 # ============================
 B2_KEY_ID = os.getenv("B2_KEY_ID")
 B2_APP_KEY = os.getenv("B2_APP_KEY")
@@ -30,9 +30,9 @@ s3 = boto3.client(
 )
 
 # ============================
-# 🚀 Interfaz Streamlit
+# Interfaz Streamlit
 # ============================
-st.title("🚀 Mi App con Streamlit + PostgreSQL + Backblaze B2")
+st.title("Mi App con Streamlit + PostgreSQL + Backblaze B2")
 
 # --- Guardar texto en PostgreSQL ---
 st.header("Guardar texto en la base de datos")
@@ -46,7 +46,7 @@ if st.button("Guardar en DB"):
         conn.commit()
         cur.close()
         conn.close()
-        st.success("Texto guardado en la base de datos ✅")
+        st.success("Texto guardado en la base de datos")
     except Exception as e:
         st.error(f"No se pudo guardar: {e}")
 
@@ -60,4 +60,5 @@ if archivo is not None:
             st.success(f"Archivo '{archivo.name}' subido correctamente 🚀")
         except Exception as e:
             st.error(f"Error al subir archivo: {e}")
+
 
